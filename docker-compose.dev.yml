@@ -1,0 +1,35 @@
+version: "2.0"
+
+services:
+  frontend:
+    container_name: ephimeral_web
+    build: ./frontend
+    env_file:
+      - ./.env
+      - ./frontend/.env
+    ports: 
+      - ${WEB_PORT}:8080
+
+  backend:
+    container_name: ephimeral_api
+    build: ./backend
+    env_file:
+      - ./.env
+      - ./backend/.env
+    ports: 
+      - ${API_PORT}:8080
+
+  env_manager:
+    container_name: ephimeral_envman
+    build: ./.env_manager
+    env_file:
+      - ./.env
+      - ./env_manager/.env
+    ports: 
+      - ${ENVMAN_PORT}:8080
+
+  # database:
+  #   image: postgres:14.24-trixie
+  #
+  # kubernetes:
+  #   image: ???
