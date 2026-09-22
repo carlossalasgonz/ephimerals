@@ -3,6 +3,7 @@ package config
 import (
 	"bufio"
 	"os"
+	"regexp"
 	"strings"
 )
 
@@ -12,14 +13,14 @@ func LoadEnv(paths ...string) (map[string]string, error) {
 	path_length := len(paths)
 
 	if path_length == 0 {
-		return vars, nil
+		return vars, err
 	}
 
 	for _, path := range paths {
 		temp_vars, err := LoadConfigurationFile(path)
 
 		if err != nil {
-			return vars, nil
+			return vars, err
 		}
 
 		for key, value := range temp_vars {
@@ -48,10 +49,12 @@ func LoadConfigurationFile(filePath string) (map[string]string, error) {
 			continue
 		}
 
-		key, value, found := strings.Cut(line, "=")
-		if !found {
+		pattern := regexp.MustCompile(`^\s*(("[^"]*"|'[^']*'|[^"'=:])*)\s*[:=]\s*(.*)$`)
+		matches := pattern.FindStringSubmatch(line)
+		if matches == nil {
 			continue
 		}
+		key, value := matches[1], matches[3]
 
 		env_vars[strings.TrimSpace(key)] = strings.TrimSpace(value)
 	}

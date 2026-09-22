@@ -3,42 +3,38 @@ package main
 import (
 	"net/http"
 	"os"
-	"strings"
 	"time"
 
+	_ "time/tzdata"
+
 	"github.com/gin-gonic/gin"
+
+	"ephimeral/config"
 )
 
 var envConf map[string]string
 
 func main() {
-	LoadEnv()
+	var err error
+	envConf, _ = config.LoadEnv("./.env.example", "./.env")
+	if _, ok := envConf["SYSTEM_TIMEZONE"]; !ok {
+		println("Missing timezone error")
+		os.Exit(1)
+	}
+	_, err = time.LoadLocation(envConf["SYSTEM_TIMEZONE"])
+	if err != nil {
+		println(err.Error())
+		os.Exit(1)
+	}
+
 	router := gin.Default()
 	router.GET("/time", func(c *gin.Context) {
-		var timezone ?= 
-			
+
 		c.JSON(http.StatusOK, gin.H{
 			"timezone": envConf["SYSTEM_TIMEZONE"],
-			"date": time.Now().Format(time.DateOnly),
-			"time": time.Now().Format(time.TimeOnly),
+			"date":     time.Now().Format(time.DateOnly),
+			"time":     time.Now().Format(time.TimeOnly),
 		})
 	})
 	router.Run()
-}
-
-func LoadEnv(){
-	var err error
-	config := make(map[string]string)
-
-	//Load default values
-	for _, entry := range os.ReadFile()
-	for _, entry := range os.Environ() {
-		key, value, found := strings.Cut(entry, "=")
-		if found {
-			config[key] = value
-		}
-	}
-
-	envConf = config
-	return err
 }
